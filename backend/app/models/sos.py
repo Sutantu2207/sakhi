@@ -30,5 +30,22 @@ class SOSEvent(Base):
     notification_status = Column(String(100), default="SENT", nullable=False)  # SENT, FAILED, PARTIAL
     admin_notes = Column(Text, nullable=True)
     responder_id = Column(String(36), nullable=True)
+    accuracy_meters = Column(Float, default=10.0, nullable=False)
+    journey_id = Column(String(36), ForeignKey("journeys.id", ondelete="SET NULL"), nullable=True, index=True)
+    share_token = Column(String(128), nullable=True)
 
     user = relationship("User", back_populates="sos_events")
+    journey = relationship("Journey")
+
+    @property
+    def user_name(self) -> Optional[str]:
+        return self.user.full_name if self.user else None
+
+    @property
+    def user_phone(self) -> Optional[str]:
+        return self.user.phone if self.user else None
+
+    @property
+    def destination_name(self) -> Optional[str]:
+        return self.journey.destination_name if self.journey else None
+
