@@ -10,6 +10,7 @@ import { RiskAnalyticsPage } from './pages/RiskAnalyticsPage';
 import { AuditLogsPage } from './pages/AuditLogsPage';
 import { LoginPage } from './pages/LoginPage';
 import { UserDashboard } from './pages/UserDashboard';
+import { MeshMonitorPage } from './pages/MeshMonitorPage';
 import { AdminApi } from './services/api';
 import { OverviewStats, Incident, SOSEvent } from './types';
 
@@ -96,6 +97,7 @@ export function App() {
     'resources': 'Emergency Infrastructure & Facilities',
     'support': 'Legal & Crisis Support Directory',
     'analytics': 'AI/ML Risk Engine & Analytics',
+    'mesh': 'SAKHI Emergency Mesh & BLE Gateway Telemetry',
     'audit': 'Security & Compliance Audit Logs',
   };
 
@@ -157,6 +159,10 @@ export function App() {
 
           {activeTab === 'analytics' && (
             <RiskAnalyticsPage stats={stats} />
+          )}
+
+          {activeTab === 'mesh' && (
+            <MeshMonitorPage />
           )}
 
           {activeTab === 'audit' && (

@@ -9,7 +9,8 @@ import {
   BarChart3, 
   History, 
   LogOut,
-  Shield
+  Shield,
+  Radio
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -47,6 +48,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     { id: 'resources', label: 'Emergency Resources', icon: Building2 },
     { id: 'support', label: 'Support Directory', icon: BookOpen },
     { id: 'analytics', label: 'Risk Analytics', icon: BarChart3 },
+    { id: 'mesh', label: 'Emergency Mesh', icon: Radio },
     { id: 'audit', label: 'Audit Logs', icon: History },
   ];
 

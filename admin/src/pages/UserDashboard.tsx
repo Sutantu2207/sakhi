@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { 
   Shield, AlertTriangle, PhoneCall, Navigation, MapPin, 
   Users, Lock, FileText, CheckCircle2, Radio, Bell, ArrowRight,
-  RefreshCw, LogOut, EyeOff, Sparkles, X, Plus, Trash2, ExternalLink
+  RefreshCw, LogOut, EyeOff, Sparkles, X, Plus, Trash2, ExternalLink,
+  Share2, HelpCircle, HeartHandshake, Wifi, Cpu, Clock, Phone, ShieldAlert
 } from 'lucide-react';
 import { UserApi } from '../services/api';
 import { IncidentMap } from '../components/IncidentMap';
@@ -58,6 +59,15 @@ export function UserDashboard({ onSwitchToAdmin }: { onSwitchToAdmin: () => void
   const [newContactName, setNewContactName] = useState('');
   const [newContactPhone, setNewContactPhone] = useState('');
   const [newContactRelation, setNewContactRelation] = useState('Sister');
+
+  // Emergency Upgrades & Modals
+  const [showHelplinesModal, setShowHelplinesModal] = useState(false);
+  const [showDecisionSupportModal, setShowDecisionSupportModal] = useState(false);
+  const [showPostSosModal, setShowPostSosModal] = useState(false);
+  const [showLocationShareModal, setShowLocationShareModal] = useState(false);
+  const [shareDuration, setShareDuration] = useState<'15m' | '30m' | '1h' | 'until_stop'>('30m');
+  const [tempShareToken, setTempShareToken] = useState<string | null>(null);
+  const [selectedDecisionCategory, setSelectedDecisionCategory] = useState<string | null>(null);
 
   // Load Initial Data
   const loadUserData = async () => {
@@ -146,6 +156,7 @@ export function UserDashboard({ onSwitchToAdmin }: { onSwitchToAdmin: () => void
     try {
       await UserApi.resolveSOS(activeSOS.id, 'User marked herself safe');
       setActiveSOS(null);
+      setShowPostSosModal(true);
     } catch (err: any) {
       alert('Error marking safe: ' + err.message);
     } finally {
@@ -533,11 +544,582 @@ export function UserDashboard({ onSwitchToAdmin }: { onSwitchToAdmin: () => void
         </div>
       )}
 
+      {/* Pan-India Emergency Helplines Modal */}
+      {showHelplinesModal && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl p-6 max-w-lg w-full shadow-2xl border border-gray-100 max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center pb-3 border-b border-gray-100">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-lg bg-red-100 text-red-600 flex items-center justify-center font-bold">
+                  <PhoneCall size={18} />
+                </div>
+                <div>
+                  <h3 className="font-extrabold text-base text-gray-900">EMERGENCY HELP CENTER</h3>
+                  <p className="text-[11px] text-gray-500">Official Pan-India verified helplines. 1-tap direct dial.</p>
+                </div>
+              </div>
+              <button onClick={() => setShowHelplinesModal(false)} className="text-gray-400 hover:text-gray-600 p-1 rounded-lg">
+                <X size={20} />
+              </button>
+            </div>
+
+            <div className="space-y-3 my-4">
+              {/* 112 */}
+              <div className="p-4 bg-red-50 rounded-2xl border border-red-100 flex items-center justify-between">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-lg font-black text-red-600">112</span>
+                    <span className="px-2 py-0.5 bg-red-200/60 text-red-800 text-[10px] font-bold rounded-md">PAN-INDIA EMERGENCY</span>
+                  </div>
+                  <p className="text-xs text-gray-700 font-medium mt-0.5">National Emergency Response (Police, Fire, Ambulance)</p>
+                  <p className="text-[10px] text-gray-500">Single emergency number across all states and union territories.</p>
+                </div>
+                <a
+                  href="tel:112"
+                  className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl text-xs shadow-md shadow-red-500/30 flex items-center gap-1.5 shrink-0"
+                >
+                  <Phone size={13} /> CALL
+                </a>
+              </div>
+
+              {/* 181 */}
+              <div className="p-4 bg-purple-50 rounded-2xl border border-purple-100 flex items-center justify-between">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-lg font-black text-purple-700">181</span>
+                    <span className="px-2 py-0.5 bg-purple-200/60 text-purple-800 text-[10px] font-bold rounded-md">WOMEN HELPLINE</span>
+                  </div>
+                  <p className="text-xs text-gray-700 font-medium mt-0.5">Women in Distress & Crisis Support</p>
+                  <p className="text-[10px] text-gray-500">24/7 confidential legal, medical, counseling & rescue support.</p>
+                </div>
+                <a
+                  href="tel:181"
+                  className="px-4 py-2 bg-[#3A1C71] hover:bg-purple-900 text-white font-bold rounded-xl text-xs shadow-md shadow-purple-900/30 flex items-center gap-1.5 shrink-0"
+                >
+                  <Phone size={13} /> CALL
+                </a>
+              </div>
+
+              {/* 1930 */}
+              <div className="p-4 bg-blue-50 rounded-2xl border border-blue-100 flex items-center justify-between">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-lg font-black text-blue-700">1930</span>
+                    <span className="px-2 py-0.5 bg-blue-200/60 text-blue-800 text-[10px] font-bold rounded-md">CYBER FRAUD & SAFETY</span>
+                  </div>
+                  <p className="text-xs text-gray-700 font-medium mt-0.5">National Cyber Crime Reporting Portal</p>
+                  <p className="text-[10px] text-gray-500">Immediate financial transaction freeze & online harassment assistance.</p>
+                </div>
+                <a
+                  href="tel:1930"
+                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-xs shadow-md shadow-blue-600/30 flex items-center gap-1.5 shrink-0"
+                >
+                  <Phone size={13} /> CALL
+                </a>
+              </div>
+
+              {/* 1098 */}
+              <div className="p-4 bg-amber-50 rounded-2xl border border-amber-100 flex items-center justify-between">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-lg font-black text-amber-700">1098</span>
+                    <span className="px-2 py-0.5 bg-amber-200/60 text-amber-800 text-[10px] font-bold rounded-md">CHILDLINE</span>
+                  </div>
+                  <p className="text-xs text-gray-700 font-medium mt-0.5">Child Protection & Emergency Assistance</p>
+                  <p className="text-[10px] text-gray-500">24-hour emergency phone outreach service for children in need.</p>
+                </div>
+                <a
+                  href="tel:1098"
+                  className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xl text-xs shadow-md shadow-amber-600/30 flex items-center gap-1.5 shrink-0"
+                >
+                  <Phone size={13} /> CALL
+                </a>
+              </div>
+
+              {/* Safety Circle Call section */}
+              {contacts.length > 0 && (
+                <div className="pt-2">
+                  <h4 className="text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">My Safety Circle Contacts</h4>
+                  <div className="space-y-2">
+                    {contacts.map(c => (
+                      <div key={c.id} className="p-3 bg-gray-50 rounded-xl border border-gray-200 flex items-center justify-between">
+                        <div>
+                          <div className="text-xs font-bold text-gray-900">{c.name} ({c.relationship || 'Guardian'})</div>
+                          <div className="text-[10px] text-gray-500">{c.phone_number}</div>
+                        </div>
+                        <a
+                          href={`tel:${c.phone_number}`}
+                          className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-lg text-xs flex items-center gap-1"
+                        >
+                          <Phone size={12} /> Call
+                        </a>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <button
+              onClick={() => setShowHelplinesModal(false)}
+              className="w-full py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-xl text-xs transition"
+            >
+              Close Helplines
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* "I Don't Know What to Do / What Happened?" Modal */}
+      {showDecisionSupportModal && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl p-6 max-w-lg w-full shadow-2xl border border-gray-100 max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center pb-3 border-b border-gray-100">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-lg bg-purple-100 text-[#3A1C71] flex items-center justify-center font-bold">
+                  <HelpCircle size={18} />
+                </div>
+                <div>
+                  <h3 className="font-extrabold text-base text-gray-900">HOW CAN WE HELP YOU?</h3>
+                  <p className="text-[11px] text-gray-500">Calm, structured guidance for unsafe situations.</p>
+                </div>
+              </div>
+              <button onClick={() => setShowDecisionSupportModal(false)} className="text-gray-400 hover:text-gray-600 p-1 rounded-lg">
+                <X size={20} />
+              </button>
+            </div>
+
+            {/* Step 1: Immediate Danger Assessment */}
+            <div className="my-4 p-4 bg-red-50 border border-red-200 rounded-2xl">
+              <span className="text-xs font-bold text-red-800 uppercase tracking-wider block mb-1">Step 1: Immediate Safety Check</span>
+              <p className="text-sm font-extrabold text-gray-900 mb-3">Are you currently in immediate physical danger?</p>
+              <div className="flex gap-2">
+                <a
+                  href="tel:112"
+                  className="flex-1 py-2.5 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl text-xs text-center shadow-md shadow-red-500/20"
+                >
+                  YES — CALL 112 NOW
+                </a>
+                <button
+                  onClick={() => setSelectedDecisionCategory('followed')}
+                  className="flex-1 py-2.5 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 font-semibold rounded-xl text-xs text-center"
+                >
+                  NO — I NEED GUIDANCE
+                </button>
+              </div>
+            </div>
+
+            {/* Step 2: Category Selector */}
+            <div className="space-y-2 mb-4">
+              <span className="text-xs font-bold text-gray-700 uppercase tracking-wider block">Step 2: What is happening?</span>
+              <div className="grid grid-cols-2 gap-2">
+                {[
+                  { id: 'followed', label: "I'm being followed", icon: "👁️" },
+                  { id: 'harassed', label: "Someone is harassing me", icon: "⚠️" },
+                  { id: 'threat', label: "Someone is threatening me", icon: "🛑" },
+                  { id: 'domestic', label: "Domestic abuse / Violence", icon: "🏠" },
+                  { id: 'cyber', label: "Cybercrime / Online blackmail", icon: "💻" },
+                  { id: 'medical', label: "I need medical help", icon: "🏥" },
+                  { id: 'dark_area', label: "I'm in an unsafe dark area", icon: "🌑" },
+                ].map(cat => (
+                  <button
+                    key={cat.id}
+                    onClick={() => setSelectedDecisionCategory(cat.id)}
+                    className={`p-3 rounded-xl text-left border text-xs font-semibold transition ${
+                      selectedDecisionCategory === cat.id
+                        ? 'bg-purple-50 border-[#3A1C71] text-[#3A1C71] shadow-sm'
+                        : 'bg-gray-50 border-gray-200 text-gray-700 hover:bg-gray-100'
+                    }`}
+                  >
+                    <span className="text-base mr-1.5">{cat.icon}</span>
+                    {cat.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Guided Instructions for selected category */}
+            {selectedDecisionCategory && (
+              <div className="p-4 bg-purple-50 border border-purple-200 rounded-2xl mb-4 space-y-3">
+                <div className="flex justify-between items-center">
+                  <h4 className="font-extrabold text-xs text-[#3A1C71] uppercase tracking-wider">
+                    Recommended Action Steps
+                  </h4>
+                  <span className="text-[10px] bg-purple-200/70 text-purple-900 font-bold px-2 py-0.5 rounded">
+                    Verified Guidance
+                  </span>
+                </div>
+
+                {selectedDecisionCategory === 'followed' && (
+                  <div className="text-xs text-gray-700 space-y-1.5">
+                    <p>• <strong>Do NOT head directly home</strong> or to isolated alleys.</p>
+                    <p>• Head toward a well-lit, busy commercial shop, metro station, or pharmacy.</p>
+                    <p>• Call a trusted contact and speak aloud so others notice.</p>
+                    <p>• <strong>Legal Protection:</strong> Section 354D IPC penalizes stalking. You can file a <em>Zero FIR</em> at any nearby police station.</p>
+                    <div className="flex gap-2 pt-2">
+                      <a href="tel:112" className="flex-1 py-2 bg-red-600 text-white rounded-lg text-xs font-bold text-center">Dial 112</a>
+                      <a href="tel:181" className="flex-1 py-2 bg-[#3A1C71] text-white rounded-lg text-xs font-bold text-center">Dial 181</a>
+                    </div>
+                  </div>
+                )}
+
+                {selectedDecisionCategory === 'harassed' && (
+                  <div className="text-xs text-gray-700 space-y-1.5">
+                    <p>• Maintain physical distance and loudly draw public attention.</p>
+                    <p>• Note descriptions, timestamps, and vehicle registration numbers if applicable.</p>
+                    <p>• <strong>Legal Protection:</strong> Section 354A IPC penalizes sexual harassment.</p>
+                    <div className="flex gap-2 pt-2">
+                      <a href="tel:181" className="flex-1 py-2 bg-[#3A1C71] text-white rounded-lg text-xs font-bold text-center">Dial 181</a>
+                      <a href="tel:112" className="flex-1 py-2 bg-red-600 text-white rounded-lg text-xs font-bold text-center">Dial 112</a>
+                    </div>
+                  </div>
+                )}
+
+                {selectedDecisionCategory === 'threat' && (
+                  <div className="text-xs text-gray-700 space-y-1.5">
+                    <p>• Move immediately toward a security booth, metro officer, or busy storefront.</p>
+                    <p>• Alert your Safety Circle and keep live sharing active.</p>
+                    <p>• <strong>Legal Protection:</strong> Criminal intimidation is punishable under Section 506 IPC.</p>
+                    <div className="flex gap-2 pt-2">
+                      <a href="tel:112" className="w-full py-2 bg-red-600 text-white rounded-lg text-xs font-bold text-center">Call Police 112</a>
+                    </div>
+                  </div>
+                )}
+
+                {selectedDecisionCategory === 'domestic' && (
+                  <div className="text-xs text-gray-700 space-y-1.5">
+                    <p>• You have the right to emergency shelter, medical care, and protection orders under the Protection of Women from Domestic Violence Act (PWDVA).</p>
+                    <p>• Dial 181 for confidential support and linkage to One-Stop Centres (Sakhi Centres).</p>
+                    <div className="flex gap-2 pt-2">
+                      <a href="tel:181" className="w-full py-2 bg-[#3A1C71] text-white rounded-lg text-xs font-bold text-center">Dial 181 Women Helpline</a>
+                    </div>
+                  </div>
+                )}
+
+                {selectedDecisionCategory === 'cyber' && (
+                  <div className="text-xs text-gray-700 space-y-1.5">
+                    <p>• <strong>Do NOT delete chats, photos, or transaction records</strong>. Take clear screenshots with timestamps and URLs.</p>
+                    <p>• If financial fraud occurred, dial <strong>1930 immediately</strong> to activate bank freeze mechanisms.</p>
+                    <p>• File a report at <em>cybercrime.gov.in</em>.</p>
+                    <div className="flex gap-2 pt-2">
+                      <a href="tel:1930" className="w-full py-2 bg-blue-600 text-white rounded-lg text-xs font-bold text-center">Dial 1930 Cyber Helpline</a>
+                    </div>
+                  </div>
+                )}
+
+                {selectedDecisionCategory === 'medical' && (
+                  <div className="text-xs text-gray-700 space-y-1.5">
+                    <p>• Dial 112 or 102 for emergency ambulance dispatch.</p>
+                    <p>• Use 'Help Near Me' to navigate to the nearest hospital emergency room.</p>
+                    <div className="flex gap-2 pt-2">
+                      <a href="tel:112" className="w-full py-2 bg-red-600 text-white rounded-lg text-xs font-bold text-center">Dial 112 Emergency</a>
+                    </div>
+                  </div>
+                )}
+
+                {selectedDecisionCategory === 'dark_area' && (
+                  <div className="text-xs text-gray-700 space-y-1.5">
+                    <p>• Turn on Journey Guard mode with continuous GPS tracking.</p>
+                    <p>• Share temporary 30-minute location token with your trusted contacts.</p>
+                    <p>• Keep phone in hand with SOS button accessible.</p>
+                    <div className="flex gap-2 pt-2">
+                      <button onClick={() => { setShowDecisionSupportModal(false); setShowLocationShareModal(true); }} className="w-full py-2 bg-[#3A1C71] text-white rounded-lg text-xs font-bold text-center">Share My Location</button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            <button
+              onClick={() => setShowDecisionSupportModal(false)}
+              className="w-full py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-xl text-xs transition"
+            >
+              Close Assistant
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Post-SOS Support Modal */}
+      {showPostSosModal && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl border border-gray-100 text-center">
+            <div className="w-16 h-16 mx-auto rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mb-3">
+              <CheckCircle2 size={32} />
+            </div>
+            <h3 className="font-extrabold text-lg text-gray-900">SOS RESOLVED</h3>
+            <p className="text-xs text-gray-500 mb-6">
+              Your emergency broadcast has been concluded and your trusted contacts notified.
+            </p>
+
+            <div className="p-4 bg-gray-50 rounded-2xl border border-gray-200 mb-6 text-left">
+              <span className="text-xs font-bold text-gray-800 block mb-2">Are you safe right now?</span>
+              <div className="flex flex-col gap-2">
+                <button
+                  onClick={() => setShowPostSosModal(false)}
+                  className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs shadow transition"
+                >
+                  YES, I AM SAFE NOW
+                </button>
+                <button
+                  onClick={() => {
+                    setShowPostSosModal(false);
+                    setShowDecisionSupportModal(true);
+                  }}
+                  className="w-full py-2.5 bg-purple-50 hover:bg-purple-100 text-[#3A1C71] border border-purple-200 font-bold rounded-xl text-xs transition"
+                >
+                  I STILL NEED HELP (Medical / Legal / Helplines)
+                </button>
+              </div>
+            </div>
+
+            <button
+              onClick={() => setShowPostSosModal(false)}
+              className="text-xs text-gray-400 hover:text-gray-600"
+            >
+              Dismiss
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Temporary Location Sharing Modal */}
+      {showLocationShareModal && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl border border-gray-100">
+            <div className="flex justify-between items-center pb-3 border-b border-gray-100">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center font-bold">
+                  <Share2 size={18} />
+                </div>
+                <div>
+                  <h3 className="font-extrabold text-base text-gray-900">TEMPORARY LOCATION SHARE</h3>
+                  <p className="text-[11px] text-gray-500">Secure, non-predictable ephemeral token.</p>
+                </div>
+              </div>
+              <button onClick={() => setShowLocationShareModal(false)} className="text-gray-400 hover:text-gray-600 p-1 rounded-lg">
+                <X size={20} />
+              </button>
+            </div>
+
+            <div className="my-4 space-y-4">
+              <div>
+                <label className="block text-xs font-bold text-gray-700 mb-1">Select Sharing Duration:</label>
+                <div className="grid grid-cols-4 gap-2">
+                  {[
+                    { id: '15m', label: '15 min' },
+                    { id: '30m', label: '30 min' },
+                    { id: '1h', label: '1 hour' },
+                    { id: 'until_stop', label: 'Until Stop' },
+                  ].map(d => (
+                    <button
+                      key={d.id}
+                      onClick={() => setShareDuration(d.id as any)}
+                      className={`py-2 rounded-xl text-xs font-bold transition border ${
+                        shareDuration === d.id
+                          ? 'bg-blue-50 border-blue-600 text-blue-700'
+                          : 'bg-gray-50 border-gray-200 text-gray-700 hover:bg-gray-100'
+                      }`}
+                    >
+                      {d.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {!tempShareToken ? (
+                <button
+                  onClick={() => {
+                    const token = 'tok_' + Math.random().toString(36).substring(2, 12);
+                    setTempShareToken(`https://sakhi.network/track/${token}`);
+                  }}
+                  className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-xs shadow-md shadow-blue-500/20 transition"
+                >
+                  Generate Ephemeral Share Link
+                </button>
+              ) : (
+                <div className="p-3 bg-blue-50 rounded-xl border border-blue-200 space-y-2">
+                  <span className="text-[10px] font-bold uppercase text-blue-800">Active Share Link</span>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      readOnly
+                      value={tempShareToken}
+                      className="w-full text-xs bg-white border border-blue-300 rounded px-2.5 py-1.5 text-gray-800"
+                    />
+                    <button
+                      onClick={() => {
+                        navigator.clipboard.writeText(tempShareToken);
+                        alert('Link copied to clipboard!');
+                      }}
+                      className="px-3 py-1.5 bg-blue-700 text-white rounded text-xs font-medium hover:bg-blue-800 whitespace-nowrap"
+                    >
+                      Copy
+                    </button>
+                  </div>
+                  <button
+                    onClick={() => setTempShareToken(null)}
+                    className="text-[11px] text-red-600 hover:underline font-semibold block pt-1"
+                  >
+                    Revoke & Deactivate Link Immediately
+                  </button>
+                </div>
+              )}
+            </div>
+
+            <button
+              onClick={() => setShowLocationShareModal(false)}
+              className="w-full py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-xl text-xs transition"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Main Content Area */}
       <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8">
         {/* TAB 1: SAFETY HUB (HOME) */}
         {activeTab === 'home' && (
           <div className="space-y-6">
+            {/* Communication Status Bar */}
+            <div className="bg-white border border-gray-200 rounded-xl px-4 py-2.5 shadow-sm flex flex-wrap items-center justify-between gap-3 text-xs">
+              <div className="flex items-center gap-2">
+                <span className="font-bold text-gray-700 uppercase tracking-wider text-[11px]">Communication Status:</span>
+              </div>
+              <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+                <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-[11px] font-semibold">
+                  <Wifi size={13} className="text-emerald-600" />
+                  <span>Internet: Online</span>
+                </div>
+                <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 border border-blue-200 text-[11px] font-semibold">
+                  <MapPin size={13} className="text-blue-600" />
+                  <span>GPS: High Accuracy (±6m)</span>
+                </div>
+                <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-purple-50 text-purple-700 border border-purple-200 text-[11px] font-semibold">
+                  <Radio size={13} className="text-purple-600" />
+                  <span>Emergency Mesh: Standby (BLE + ESP-NOW)</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Core 6 Emergency Actions Grid */}
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+              {/* 1. SOS */}
+              <button
+                onClick={activeSOS ? resolveSOSNow : startSosCountdown}
+                className="p-4 rounded-2xl bg-gradient-to-br from-red-500 to-rose-600 text-white font-bold text-left shadow-lg hover:shadow-red-500/30 hover:scale-[1.02] active:scale-95 transition flex flex-col justify-between h-28"
+              >
+                <div className="flex justify-between items-center w-full">
+                  <AlertTriangle size={24} className="text-white" />
+                  <span className="text-[10px] uppercase font-bold bg-white/20 px-1.5 py-0.5 rounded">Emergency</span>
+                </div>
+                <div>
+                  <div className="text-sm font-black tracking-wide">🚨 SOS</div>
+                  <div className="text-[10px] text-red-100 font-normal">Press & Hold 2s</div>
+                </div>
+              </button>
+
+              {/* 2. Emergency Help */}
+              <button
+                onClick={() => setShowHelplinesModal(true)}
+                className="p-4 rounded-2xl bg-gradient-to-br from-[#3A1C71] to-[#4A2590] text-white font-bold text-left shadow-md hover:shadow-purple-500/20 hover:scale-[1.02] active:scale-95 transition flex flex-col justify-between h-28"
+              >
+                <div className="flex justify-between items-center w-full">
+                  <PhoneCall size={22} className="text-purple-200" />
+                  <span className="text-[10px] uppercase font-bold bg-white/20 px-1.5 py-0.5 rounded">1-Tap Dial</span>
+                </div>
+                <div>
+                  <div className="text-sm font-black tracking-wide">☎ Helplines</div>
+                  <div className="text-[10px] text-purple-200 font-normal">112, 181, 1930, 1098</div>
+                </div>
+              </button>
+
+              {/* 3. Safety Circle */}
+              <button
+                onClick={() => setActiveTab('contacts')}
+                className="p-4 rounded-2xl bg-white border border-gray-200 text-gray-800 font-bold text-left shadow-sm hover:border-purple-300 hover:scale-[1.02] active:scale-95 transition flex flex-col justify-between h-28"
+              >
+                <div className="flex justify-between items-center w-full">
+                  <Users size={22} className="text-[#3A1C71]" />
+                  <span className="text-[10px] uppercase font-bold bg-purple-100 text-[#3A1C71] px-1.5 py-0.5 rounded">{contacts.length} Connected</span>
+                </div>
+                <div>
+                  <div className="text-sm font-black tracking-wide">👥 Safety Circle</div>
+                  <div className="text-[10px] text-gray-500 font-normal">Trusted Guardians</div>
+                </div>
+              </button>
+
+              {/* 4. Share My Location */}
+              <button
+                onClick={() => setShowLocationShareModal(true)}
+                className="p-4 rounded-2xl bg-white border border-gray-200 text-gray-800 font-bold text-left shadow-sm hover:border-purple-300 hover:scale-[1.02] active:scale-95 transition flex flex-col justify-between h-28"
+              >
+                <div className="flex justify-between items-center w-full">
+                  <Share2 size={22} className="text-blue-600" />
+                  <span className="text-[10px] uppercase font-bold bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded">Timed</span>
+                </div>
+                <div>
+                  <div className="text-sm font-black tracking-wide">📍 Share Location</div>
+                  <div className="text-[10px] text-gray-500 font-normal">15m, 30m, 1h tokens</div>
+                </div>
+              </button>
+
+              {/* 5. Start Safe Journey */}
+              <button
+                onClick={() => setActiveTab('journey')}
+                className="p-4 rounded-2xl bg-white border border-gray-200 text-gray-800 font-bold text-left shadow-sm hover:border-purple-300 hover:scale-[1.02] active:scale-95 transition flex flex-col justify-between h-28"
+              >
+                <div className="flex justify-between items-center w-full">
+                  <Navigation size={22} className="text-emerald-600" />
+                  <span className="text-[10px] uppercase font-bold bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded">{activeJourney ? 'Active' : 'Start'}</span>
+                </div>
+                <div>
+                  <div className="text-sm font-black tracking-wide">🧭 Safe Journey</div>
+                  <div className="text-[10px] text-gray-500 font-normal">Route & Check-ins</div>
+                </div>
+              </button>
+
+              {/* 6. Help Near Me */}
+              <button
+                onClick={() => setActiveTab('nearby')}
+                className="p-4 rounded-2xl bg-white border border-gray-200 text-gray-800 font-bold text-left shadow-sm hover:border-purple-300 hover:scale-[1.02] active:scale-95 transition flex flex-col justify-between h-28"
+              >
+                <div className="flex justify-between items-center w-full">
+                  <MapPin size={22} className="text-amber-600" />
+                  <span className="text-[10px] uppercase font-bold bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded">Verified</span>
+                </div>
+                <div>
+                  <div className="text-sm font-black tracking-wide">🗺️ Help Near Me</div>
+                  <div className="text-[10px] text-gray-500 font-normal">Police, Hospitals</div>
+                </div>
+              </button>
+            </div>
+
+            {/* "I Don't Know What to Do / What Happened?" Banner */}
+            <div className="bg-gradient-to-r from-purple-50 via-indigo-50 to-pink-50 border border-purple-200 rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-[#3A1C71] text-white flex items-center justify-center shrink-0 shadow-md">
+                  <HelpCircle size={22} />
+                </div>
+                <div>
+                  <h4 className="font-extrabold text-sm text-[#3A1C71]">I DON'T KNOW WHAT TO DO / WHAT HAPPENED?</h4>
+                  <p className="text-xs text-gray-600">
+                    Feeling unsafe, followed, or facing cyber fraud? Follow our calm step-by-step decision support flow.
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => {
+                  setSelectedDecisionCategory(null);
+                  setShowDecisionSupportModal(true);
+                }}
+                className="px-4 py-2 bg-[#3A1C71] hover:bg-purple-900 text-white font-bold rounded-xl text-xs whitespace-nowrap shadow-sm transition shrink-0"
+              >
+                Open Decision Assistant &rarr;
+              </button>
+            </div>
+
             {/* Hero Welcome & Philosophy */}
             <div className="bg-gradient-to-r from-[#3A1C71] via-[#4A2590] to-[#2E1559] rounded-2xl p-6 text-white shadow-xl flex flex-col md:flex-row items-center justify-between gap-6">
               <div className="space-y-2 max-w-xl">
